@@ -17,16 +17,16 @@ package frc.robot;
  */
 public final class Constants {
 
-    public static final double distBetweenWheelsInches = 26.84603809585759;
+    public static final double distBetweenWheelsInches = 23;//26.84603809585759;
     public static final double gearRatio = 1 / 13.85;
-    public static final double wheelDiameterInches = 6.18;
+    public static final double wheelDiameterInches = 6.375;//18;
     public static final double wheelCircumferenceInches = wheelDiameterInches * Math.PI;
     public static final double encoderTicksPerRev = 2048;
 
     public static final double kS = 0.358;
     public static final double kV = 3.02;
     public static final double kA = 0.249;
-    public static final double kP = 0.00284;
+    public static final double kP = 0.0405;
     public static final double kD = 0.0;
 
 }

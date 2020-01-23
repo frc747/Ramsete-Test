@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Transform2d;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
@@ -39,6 +40,7 @@ public class RobotContainer {
     configureButtonBindings();
     m_driveSubsystem.resetEncoders();
     m_driveSubsystem.resetHeading();
+    m_driveSubsystem.resetOdometry();
   }
 
   /**
@@ -60,13 +62,14 @@ public class RobotContainer {
 
     m_driveSubsystem.resetEncoders();
     m_driveSubsystem.resetHeading();
+    m_driveSubsystem.resetOdometry();
 
     TrajectoryConfig config = new TrajectoryConfig(2/*3.97350993*/, 2);
 
     config.setKinematics(m_driveSubsystem.getKinematics());
 
     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
-      Arrays.asList(new Pose2d(), new Pose2d(1.0, 0, new Rotation2d())), 
+      Arrays.asList(new Pose2d(), new Pose2d(1.0, 0.0, Rotation2d.fromDegrees(0))), 
       config
     );
 

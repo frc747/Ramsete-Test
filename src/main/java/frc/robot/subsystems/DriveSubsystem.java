@@ -27,10 +27,10 @@ import frc.robot.Constants;
 public class DriveSubsystem extends SubsystemBase {
   
   
-  TalonFX leftDrivePrimary = new TalonFX(0);
-  TalonFX leftDriveBack = new TalonFX(1);
-  TalonFX rightDrivePrimary = new TalonFX(15);
-  TalonFX rightDriveBack = new TalonFX(14);
+  TalonFX leftDrivePrimary = new TalonFX(15);
+  TalonFX leftDriveBack = new TalonFX(14);
+  TalonFX rightDrivePrimary = new TalonFX(0);
+  TalonFX rightDriveBack = new TalonFX(1);
 
   PigeonIMU pigeon = new PigeonIMU(0);
 
@@ -46,23 +46,25 @@ public class DriveSubsystem extends SubsystemBase {
   Pose2d pose;
   
   public DriveSubsystem() {
+    leftDrivePrimary.setInverted(true);
+    leftDriveBack.setInverted(true);
+    rightDrivePrimary.setInverted(false);
+    rightDriveBack.setInverted(false);
+
     leftDriveBack.follow(leftDrivePrimary);
     rightDriveBack.follow(rightDrivePrimary);
-
-    leftDrivePrimary.setInverted(false);
-    rightDrivePrimary.setInverted(false);
   }
 
   public double getYaw() {
     double ypr[] = {0,0,0};
     pigeon.getYawPitchRoll(ypr);
-    return ypr[0];
+    return Math.IEEEremainder(ypr[0], 360.0d);
   }
 
   public Rotation2d getHeading() {
     double ypr[] = {0,0,0};
     pigeon.getYawPitchRoll(ypr);
-    return Rotation2d.fromDegrees(ypr[0]);
+    return Rotation2d.fromDegrees(Math.IEEEremainder(ypr[0], 360.0d));
   }
 
   public PIDController getLeftPIDController() {
@@ -85,7 +87,7 @@ public class DriveSubsystem extends SubsystemBase {
     System.out.println("L: " + leftVoltage);
     System.out.println("R: " + rightVoltage);
     leftDrivePrimary.set(ControlMode.PercentOutput, leftVoltage/12);
-    rightDrivePrimary.set(ControlMode.PercentOutput, -rightVoltage/12);
+    rightDrivePrimary.set(ControlMode.PercentOutput, rightVoltage/12);
   }
 
   public Pose2d getPose() {
@@ -101,25 +103,29 @@ public class DriveSubsystem extends SubsystemBase {
     pigeon.setYaw(0);
   }
 
+  public void resetOdometry() {
+    odometry.resetPosition(new Pose2d(), getHeading());
+  }
+
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
     return new DifferentialDriveWheelSpeeds(
       leftDrivePrimary.getSelectedSensorVelocity() * Constants.gearRatio * 10.0 / Constants.encoderTicksPerRev * Units.inchesToMeters(Constants.wheelCircumferenceInches),
-      -rightDrivePrimary.getSelectedSensorVelocity() * Constants.gearRatio * 10.0 / Constants.encoderTicksPerRev * Units.inchesToMeters(Constants.wheelCircumferenceInches)
+      rightDrivePrimary.getSelectedSensorVelocity() * Constants.gearRatio * 10.0 / Constants.encoderTicksPerRev * Units.inchesToMeters(Constants.wheelCircumferenceInches)
     );
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    pose = odometry.update(getHeading(), leftDrivePrimary.getSelectedSensorPosition() / Constants.encoderTicksPerRev * Constants.gearRatio * Units.inchesToMeters(Constants.wheelCircumferenceInches), -rightDrivePrimary.getSelectedSensorPosition() / Constants.encoderTicksPerRev * Constants.gearRatio * Units.inchesToMeters(Constants.wheelCircumferenceInches));
+    pose = odometry.update(getHeading(), leftDrivePrimary.getSelectedSensorPosition() / Constants.encoderTicksPerRev * Constants.gearRatio * Units.inchesToMeters(Constants.wheelCircumferenceInches), rightDrivePrimary.getSelectedSensorPosition() / Constants.encoderTicksPerRev * Constants.gearRatio * Units.inchesToMeters(Constants.wheelCircumferenceInches));
     
     SmartDashboard.putNumber("left encoder pos", leftDrivePrimary.getSelectedSensorPosition());
-    SmartDashboard.putNumber("right encoder pos", -rightDrivePrimary.getSelectedSensorPosition());
+    SmartDashboard.putNumber("right encoder pos", rightDrivePrimary.getSelectedSensorPosition());
 
     SmartDashboard.putNumber("heading", getYaw());
 
     SmartDashboard.putNumber("left encoder vel", leftDrivePrimary.getSelectedSensorVelocity());
-    SmartDashboard.putNumber("right encoder vel", -rightDrivePrimary.getSelectedSensorVelocity());
+    SmartDashboard.putNumber("right encoder vel", rightDrivePrimary.getSelectedSensorVelocity());
 
     SmartDashboard.putNumber("X pose", odometry.getPoseMeters().getTranslation().getX());
     SmartDashboard.putNumber("Y pose", odometry.getPoseMeters().getTranslation().getY());
